@@ -5,16 +5,31 @@ public class Program
 
     public static void Main()
     {
-        Console.WriteLine(GetPrefix("Tdfgest"));
-        string? text;
-        text = Console.ReadLine();
+        string text = "littering";
+        Console.WriteLine(GetTranslation(text) == "itteringlay " ? "Correct" : "Wrong");
+    }
+
+    private static IEnumerable<string> GetListWords(string text)
+    {
+        IList<string> words = new List<string>();
+        words.Add(text);
+        return words;
     }
 
     private static string GetTranslation(string? text)
     {
+        string traslated = "";
         if (string.IsNullOrEmpty(text))
             return "";
-        return default;
+
+        var words = GetListWords(text);
+        foreach (string word in words)
+        {
+            var prefix = GetPrefix(word);
+            var stem = GetStem(prefix, word);
+            traslated += stem + prefix + "ay ";
+        }
+        return traslated;
     }
 
     private static string GetPrefix(string word)
@@ -28,4 +43,6 @@ public class Program
         }
         return prefix;
     }
+
+    private static string GetStem(string prefix, string word) => word[prefix.Length..];
 }
