@@ -5,8 +5,11 @@ public class Program
 
     public static void Main()
     {
-        string text = "No, littering";
-        Console.WriteLine(GetTranslation(text) == "itteringlay " ? "Correct" : "Wrong");
+        string text = "Iaue";
+        Console.WriteLine(GetTranslation(text) == "Iaueyay " ? "Correct" : "Wrong");
+        Console.WriteLine(GetTranslation(text) == "Onay, itteringlay " ? "Correct" : "Wrong");
+        text = "No shirts, no shoes, no service";
+        Console.WriteLine(GetTranslation(text) == "Onay irtsshay, onay oesshay, onay ervicesay " ? "Correct" : "Wrong");
     }
 
     private static IEnumerable<string> GetListWords(string text) => text.Split(" ");
@@ -22,7 +25,26 @@ public class Program
         {
             var prefix = GetPrefix(word);
             var stem = GetStem(prefix, word);
-            traslated += stem + prefix + "ay ";
+            var sufix = "ay";
+
+            if (IsOnlyVowels(word))
+            {
+                sufix = "yay";
+            }
+
+            if (HasPunctuation(word))
+            {
+                char punct = word[word.Length - 1];
+                stem = stem[0..^1];
+                sufix += punct;
+            }
+            if (HasCapitalLetter(word))
+            {
+                prefix = prefix.ToLower();
+                stem = char.ToUpper(stem[0]) + stem[1..];
+            }
+
+            traslated += stem + prefix + sufix + " ";
         }
         return traslated;
     }
@@ -39,5 +61,17 @@ public class Program
         return prefix;
     }
 
+    private static bool IsOnlyVowels(string word)
+    {
+        foreach (var item in word)
+            if (!_vowels.Any(v => v == item))
+                return false;
+        return true;
+    }
+
     private static string GetStem(string prefix, string word) => word[prefix.Length..];
+
+    private static bool HasPunctuation(string word) => char.IsPunctuation(word[^1]);
+
+    private static bool HasCapitalLetter(string word) => char.IsUpper(word[0]);
 }
