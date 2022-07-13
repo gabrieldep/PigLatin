@@ -5,11 +5,8 @@ public class Program
 
     public static void Main()
     {
-        string text = "Iaue";
-        Console.WriteLine(GetTranslation(text) == "Iaueyay " ? "Correct" : "Wrong");
-        Console.WriteLine(GetTranslation(text) == "Onay, itteringlay " ? "Correct" : "Wrong");
-        text = "No shirts, no shoes, no service";
-        Console.WriteLine(GetTranslation(text) == "Onay irtsshay, onay oesshay, onay ervicesay " ? "Correct" : "Wrong");
+        string text = "Hey you, you shot 1, but not 2, bullet at my eye!";
+        Console.WriteLine(GetTranslation(text));
     }
 
     private static IEnumerable<string> GetListWords(string text) => text.Split(" ");
@@ -23,14 +20,18 @@ public class Program
         var words = GetListWords(text);
         foreach (string word in words)
         {
-            var prefix = GetPrefix(word);
-            var stem = GetStem(prefix, word);
-            var sufix = "ay";
+            if (int.TryParse(RemovePunctuation(word), out _))
+            {
+                traslated += word + " "; 
+                continue;
+            }
+
+            string prefix = GetPrefix(word);
+            string stem = GetStem(prefix, word);
+            string sufix = "ay";
 
             if (IsOnlyVowels(word))
-            {
                 sufix = "yay";
-            }
 
             if (HasPunctuation(word))
             {
@@ -63,11 +64,14 @@ public class Program
 
     private static bool IsOnlyVowels(string word)
     {
+        word = RemovePunctuation(word);
         foreach (var item in word)
             if (!_vowels.Any(v => v == item))
                 return false;
         return true;
     }
+
+    private static string RemovePunctuation(string word) => new(word.Where(c => !char.IsPunctuation(c)).ToArray());
 
     private static string GetStem(string prefix, string word) => word[prefix.Length..];
 
