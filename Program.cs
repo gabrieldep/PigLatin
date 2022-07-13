@@ -5,16 +5,11 @@ public class Program
 
     public static void Main()
     {
-        string text = "littering";
+        string text = "No, littering";
         Console.WriteLine(GetTranslation(text) == "itteringlay " ? "Correct" : "Wrong");
     }
 
-    private static IEnumerable<string> GetListWords(string text)
-    {
-        IList<string> words = new List<string>();
-        words.Add(text);
-        return words;
-    }
+    private static IEnumerable<string> GetListWords(string text) => text.Split(" ");
 
     private static string GetTranslation(string? text)
     {
