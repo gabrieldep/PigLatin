@@ -132,14 +132,14 @@
         /// <summary>
         /// Print on command line if the return of GetTranslation is correct
         /// </summary>
-        /// <param name="text"></param>
-        /// <param name="translated"></param>
+        /// <param name="text">Text to translate</param>
+        /// <param name="translated">The correct translation</param>
         private static void Verify(string? text, string translated)
         {
             string translation = GetTranslation(text);
             Console.WriteLine($"Text: {text}");
             Console.WriteLine($"Translation: {translation}");
-            Console.WriteLine(translation == translated ? "Correct" : "Wrong");
+            Console.WriteLine(translation.Equals(translated) ? "Correct" : "Wrong");
             Console.WriteLine();
         }
     }
