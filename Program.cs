@@ -6,7 +6,9 @@
 
         public static void Main()
         {
-            string text = "";
+            string? text = "";
+            Console.WriteLine(GetTranslation(text) == "" ? "Correct" : "Wrong");
+            text = null;
             Console.WriteLine(GetTranslation(text) == "" ? "Correct" : "Wrong");
             text = "Hey you, you shot 1, but not 2, bullet at my eye!";
             Console.WriteLine(GetTranslation(text) == "Eyhay youyay, youyay otshay 1, utbay otnay 2, ulletbay atay ymay eyeyay!" ? "Correct" : "Wrong");
@@ -59,8 +61,6 @@
             return traslated[0..^1];
         }
 
-        private static string[] GetListWords(string text) => text.Split(" ");
-
         private static string GetPrefix(string word)
         {
             string prefix = "";
@@ -72,6 +72,8 @@
             }
             return prefix;
         }
+
+        private static string[] GetListWords(string text) => text.Split(" ");
 
         private static string GetStem(string prefix, string word) => word[prefix.Length..];
 
