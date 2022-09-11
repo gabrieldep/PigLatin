@@ -1,20 +1,46 @@
-﻿using System;
+﻿using KisTechTest.Models;
+using Redis.OM;
+using System;
 using System.Linq;
 namespace KisTechTest
 {
     public class Program
     {
         private static readonly char[] _vowels = new[] { 'A', 'a', 'E', 'e', 'I', 'i', 'O', 'o', 'U', 'u', 'Y', 'y' };
+        private static readonly RedisConnectionProvider _provider = new("redis://localhost:6379");
 
-        public static void Main()
+        public static async Task Main()
         {
-            Verify("Hey you, you shot 1, but not 2, bullet at my eye!", "Eyhay youyay, youyay otshay 1, utbay otnay 2, ulletbay atay ymay eyeyay!");
-            Verify("Stop", "Opstay");
-            Verify("I", "Iyay");
-            Verify("No, littering", "Onay, itteringlay");
-            Verify("No shirts, no shoes, no service", "Onay irtsshay, onay oesshay, onay ervicesay");
-            Verify("No persons under 14 admitted", "Onay ersonspay underay 14 admitteday");
-            Verify("Hey buddy, get away from my car!", "Eyhay uddybay, etgay awayay omfray ymay arcay!");
+            await _provider.Connection.CreateIndexAsync(typeof(WordRedis));
+
+            await VerifyAsync("Hey you, you shot 1, but not 2, bullet at my eye!", "Eyhay youyay, youyay otshay 1, utbay otnay 2, ulletbay atay ymay eyeyay!");
+            await VerifyAsync("Stop", "Opstay");
+            await VerifyAsync("I", "Iyay");
+            await VerifyAsync("No, littering", "Onay, itteringlay");
+            await VerifyAsync("No shirts, no shoes, no service", "Onay irtsshay, onay oesshay, onay ervicesay");
+            await VerifyAsync("No persons under 14 admitted", "Onay ersonspay underay 14 admitteday");
+            await VerifyAsync("Hey buddy, get away from my car!", "Eyhay uddybay, etgay awayay omfray ymay arcay!");
+        }
+
+        internal static async Task SaveWord(string word, string translation)
+        {
+            var redisModel = new WordRedis()
+            {
+                Word = word,
+                Translation = translation
+            };
+            var words = _provider.RedisCollection<WordRedis>();
+            await words.InsertAsync(redisModel);
+        }
+
+        internal static string? GetRedisCacheTranslation(string word)
+        {
+            var words = _provider.RedisCollection<WordRedis>();
+            if (words.Count() == 0)
+                return null;
+
+            var redisWord = words.Where(w => w.Word == word)?.FirstOrDefault();
+            return redisWord?.Translation;
         }
 
         /// <summary>
@@ -22,7 +48,7 @@ namespace KisTechTest
         /// </summary>
         /// <param name="text">Text to be translated</param>
         /// <returns>The text translation</returns>
-        private static string GetTranslation(string? text)
+        private static async Task<string> GetTranslation(string? text)
         {
             string traslated = "";
             if (string.IsNullOrEmpty(text))
@@ -31,6 +57,13 @@ namespace KisTechTest
             string[] words = GetListWords(text);
             foreach (string word in words)
             {
+                var cache = GetRedisCacheTranslation(RemovePunctuation(word));
+                if (cache != null)
+                {
+                    traslated += cache + " ";
+                    continue;
+                }
+
                 if (IsNumber(word) || string.IsNullOrEmpty(word))
                 {
                     traslated += word + " ";
@@ -53,6 +86,7 @@ namespace KisTechTest
                     stem = char.ToUpper(stem[0]) + stem[1..];
                 }
                 traslated += stem + prefix + sufix + " ";
+                await SaveWord(word, stem + prefix + RemovePunctuation(sufix));
             }
             return traslated[0..^1];
         }
@@ -136,9 +170,9 @@ namespace KisTechTest
         /// </summary>
         /// <param name="text">Text to translate</param>
         /// <param name="translated">The correct translation</param>
-        private static void Verify(string? text, string translated)
+        private static async Task VerifyAsync(string? text, string translated)
         {
-            string translation = GetTranslation(text);
+            string translation = await GetTranslation(text);
             Console.WriteLine($"Text: {text}");
             Console.WriteLine($"Translation: {translation}");
             Console.WriteLine(translation.Equals(translated) ? "Correct" : "Wrong");
