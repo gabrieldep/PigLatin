@@ -20,8 +20,4 @@
     </PackageReference>
   </ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\KisTechTest.csproj" />
-  </ItemGroup>
-
 </Project>
